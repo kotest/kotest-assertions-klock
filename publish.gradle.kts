@@ -56,14 +56,14 @@ publishing {
     register("mavenJava", MavenPublication::class) {
       from(components["java"])
       pom {
-        name.set("kotest-extensions-wiremock")
-        description.set("Kotest extension for wiremock")
-        url.set("http://www.github.com/kotest/kotest-extensions-wiremock")
+        name.set("kotest-assertions-klock")
+        description.set("Kotest assertions for klock")
+        url.set("http://www.github.com/kotest/kotest-assertions-klock")
 
         scm {
-          connection.set("scm:git:http://www.github.com/kotest/kotest-extensions-wiremock")
+          connection.set("scm:git:http://www.github.com/kotest/kotest-assertions-klock")
           developerConnection.set("scm:git:http://github.com/sksamuel")
-          url.set("http://www.github.com/kotest/kotest-extensions-wiremock")
+          url.set("http://www.github.com/kotest/kotest-assertions-klock")
         }
 
         licenses {
