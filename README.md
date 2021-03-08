@@ -1,7 +1,5 @@
 # kotest-assertions-klock
 
-Kotest assertions for the  library
-
 A kotest assertions library for [klock](https://github.com/korlibs/klock).
 
 See [docs](https://kotest.io/docs/assertions/klock-matchers.html).
