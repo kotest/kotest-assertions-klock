@@ -109,6 +109,13 @@ class DateMatchersTest : StringSpec() {
          Date(2014, 1, 2) shouldNotHaveMonth (4)
       }
 
+      "Date should have same week ignoring other fields" {
+         Date(2014, 1, 2) should haveDayOfWeek(Thursday)
+         Date(2014, 1, 2) shouldNot haveDayOfWeek(Monday)
+         Date(2014, 1, 2) shouldHaveDayOfWeek (Thursday)
+         Date(2014, 1, 2) shouldNotHaveDayOfWeek (Tuesday)
+      }
+
       "Date should have same day ignoring other fields" {
          Date(2014, 1, 2) should haveSameDay(Date(2014, 1, 2))
          Date(2014, 1, 2) shouldNot haveSameDay(Date(2014, 4, 6))
@@ -119,11 +126,6 @@ class DateMatchersTest : StringSpec() {
          Date(2014, 1, 2) shouldNot haveDay(6)
          Date(2014, 1, 2) shouldHaveDay (2)
          Date(2014, 1, 2) shouldNotHaveDay (6)
-
-         Date(2014, 1, 2) should haveDayOfWeek(Thursday)
-         Date(2014, 1, 2) shouldNot haveDayOfWeek(Monday)
-         Date(2014, 1, 2) shouldHaveDayOfWeek (Thursday)
-         Date(2014, 1, 2) shouldNotHaveDayOfWeek (Tuesday)
       }
 
       "Date.shouldBeToday() should match today" {

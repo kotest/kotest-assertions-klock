@@ -16,10 +16,7 @@ buildscript {
 plugins {
    java
    `java-library`
-   id("java-library")
-   id("maven-publish")
    signing
-   maven
    `maven-publish`
    kotlin("multiplatform").version(Libs.kotlinVersion)
 }
@@ -48,7 +45,7 @@ kotlin {
          }
       }
 
-      js(BOTH) {
+      js(IR) {
          browser()
          nodejs()
       }
@@ -58,12 +55,13 @@ kotlin {
       mingwX64()
 
       macosX64()
-      tvos()
-//      watchos()
+
+      watchosArm32()
+      watchosArm64()
+      watchosX86()
 
       iosX64()
       iosArm64()
-      iosArm32()
    }
 
    sourceSets {
@@ -102,23 +100,23 @@ kotlin {
          dependsOn(desktopMain)
       }
 
-      val iosX64Main by getting {
-         dependsOn(desktopMain)
-      }
-
       val iosArm64Main by getting {
          dependsOn(desktopMain)
       }
 
-      val iosArm32Main by getting {
+      val iosX64Main by getting {
          dependsOn(desktopMain)
       }
 
-//      val watchosMain by getting {
-//         dependsOn(desktopMain)
-//      }
+      val watchosArm64Main by getting {
+         dependsOn(desktopMain)
+      }
 
-      val tvosMain by getting {
+      val watchosArm32Main by getting {
+         dependsOn(desktopMain)
+      }
+
+      val watchosX86Main by getting {
          dependsOn(desktopMain)
       }
 
@@ -141,7 +139,7 @@ tasks.named<Test>("jvmTest") {
          org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED,
          org.gradle.api.tasks.testing.logging.TestLogEvent.PASSED
       )
-      exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+      exceptionFormat = TestExceptionFormat.FULL
    }
 }
 
