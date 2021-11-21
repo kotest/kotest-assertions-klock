@@ -7,9 +7,6 @@ buildscript {
       maven {
          url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
       }
-      maven {
-         url = uri("https://plugins.gradle.org/m2/")
-      }
    }
 }
 
@@ -19,6 +16,7 @@ plugins {
    signing
    `maven-publish`
    kotlin("multiplatform").version(Libs.kotlinVersion)
+   id("org.jetbrains.dokka") version "0.10.1"
 }
 
 repositories {
@@ -103,11 +101,6 @@ kotlin {
       val iosX64Main by getting {
          dependsOn(desktopMain)
       }
-
-      all {
-         languageSettings.useExperimentalAnnotation("kotlin.time.ExperimentalTime")
-         languageSettings.useExperimentalAnnotation("kotlin.experimental.ExperimentalTypeInference")
-      }
    }
 }
 
@@ -127,4 +120,4 @@ tasks.named<Test>("jvmTest") {
    }
 }
 
-apply("./publish.gradle.kts")
+apply("./publish-mpp.gradle.kts")

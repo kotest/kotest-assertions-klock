@@ -1,5 +1,3 @@
-apply(plugin = "java")
-apply(plugin = "java-library")
 apply(plugin = "maven-publish")
 apply(plugin = "signing")
 
@@ -16,10 +14,6 @@ fun Project.publishing(action: PublishingExtension.() -> Unit) =
 fun Project.signing(configure: SigningExtension.() -> Unit): Unit =
   configure(configure)
 
-fun Project.java(configure: JavaPluginExtension.() -> Unit): Unit =
-  configure(configure)
-
-
 val publications: PublicationContainer = (extensions.getByName("publishing") as PublishingExtension).publications
 
 signing {
@@ -31,11 +25,6 @@ signing {
   if (Ci.isRelease) {
     sign(publications)
   }
-}
-
-java {
-  withJavadocJar()
-  withSourcesJar()
 }
 
 publishing {
@@ -52,23 +41,23 @@ publishing {
     }
   }
 
-  publications {
-    register("mavenJava", MavenPublication::class) {
-      from(components["java"])
+  publications.withType<MavenPublication>().forEach {
+    it.apply {
+      //if (Ci.isRelease)
       pom {
-        name.set("kotest-assertions-klock")
-        description.set("Kotest assertions for klock")
-        url.set("http://www.github.com/kotest/kotest-assertions-klock")
+        name.set("Kotest")
+        description.set("Kotlin Test Framework")
+        url.set("https://github.com/kotest/kotest-assertions-klock")
 
         scm {
-          connection.set("scm:git:http://www.github.com/kotest/kotest-assertions-klock")
-          developerConnection.set("scm:git:http://github.com/sksamuel")
-          url.set("http://www.github.com/kotest/kotest-assertions-klock")
+          connection.set("scm:git:https://github.com/kotest/kotest-assertions-klock")
+          developerConnection.set("scm:git:https://github.com/sksamuel")
+          url.set("https://github.com/kotest/kotest-assertions-klock")
         }
 
         licenses {
           license {
-            name.set("The Apache 2.0 License")
+            name.set("Apache-2.0")
             url.set("https://opensource.org/licenses/Apache-2.0")
           }
         }
@@ -81,7 +70,6 @@ publishing {
           }
         }
       }
-
     }
   }
 }
