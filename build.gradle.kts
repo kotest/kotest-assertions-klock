@@ -58,7 +58,6 @@ kotlin {
 
       watchosArm32()
       watchosArm64()
-      watchosX86()
 
       iosX64()
       iosArm64()
@@ -113,10 +112,6 @@ kotlin {
       }
 
       val watchosArm32Main by getting {
-         dependsOn(desktopMain)
-      }
-
-      val watchosX86Main by getting {
          dependsOn(desktopMain)
       }
 

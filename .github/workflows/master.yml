@@ -70,9 +70,6 @@ jobs:
          -  name: publish macosx64 snapshots
             run: ./gradlew publishMacosX64PublicationToDeployRepository
 
-         -  name: publish watchosX86 snapshots
-            run: ./gradlew publishWatchosX86PublicationToDeployRepository
-
          -  name: publish watchosArm32 snapshots
             run: ./gradlew publishWatchosArm32PublicationToDeployRepository
 
