@@ -9,29 +9,111 @@ on:
          - master
 
 jobs:
-   build:
+   publish_linux:
       runs-on: ubuntu-latest
+
       steps:
          -  name: Checkout the repo
             uses: actions/checkout@v2
             with:
                fetch-depth: 0
+               ref: ${{ github.event.inputs.branch }}
 
          -  name: Setup JDK
-            uses: actions/setup-java@v1
+            uses: actions/setup-java@v2
             with:
-               java-version: '11'
+               distribution: 'zulu'
+               java-version: '8'
 
          -  name: Run tests
             run: ./gradlew check
 
-         -  name: publish snapshots
-            run: ./gradlew publish
-            env:
-               OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-               OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-               ORG_GRADLE_PROJECT_signingKey: ${{ secrets.SIGNING_KEY }}
-               ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGNING_PASSWORD }}
+         -  name: publish multiplatform snapshots
+            run: ./gradlew publishKotlinMultiplatformPublicationToDeployRepository
+
+         -  name: publish jvm snapshots
+            run: ./gradlew publishJvmPublicationToDeployRepository
+
+         -  name: publish js snapshots
+            run: ./gradlew publishJsPublicationToDeployRepository
+
+         -  name: publish linux x64 snapshots
+            run: ./gradlew publishLinuxX64PublicationToDeployRepository
+
+         -  name: Bundle the build report
+            if: failure()
+            run: find . -type d -name 'reports' | zip -@ -r build-reports.zip
+
+         -  name: Upload the build report
+            if: failure()
+            uses: actions/upload-artifact@master
+            with:
+               name: error-report
+               path: build-reports.zip
+
+   publish_macos:
+      runs-on: macos-11
+      needs: publish_linux
+
+      steps:
+         -  name: Checkout the repo
+            uses: actions/checkout@v2
+            with:
+               fetch-depth: 0
+               ref: ${{ github.event.inputs.branch }}
+
+         -  name: Setup JDK
+            uses: actions/setup-java@v1
+            with:
+               java-version: '8'
+
+         -  name: publish macosx64 snapshots
+            run: ./gradlew publishMacosX64PublicationToDeployRepository
+
+         -  name: publish watchosX86 snapshots
+            run: ./gradlew publishWatchosX86PublicationToDeployRepository
+
+         -  name: publish watchosArm32 snapshots
+            run: ./gradlew publishWatchosArm32PublicationToDeployRepository
+
+         -  name: publish watchosArm64 snapshots
+            run: ./gradlew publishWatchosArm64PublicationToDeployRepository
+
+         -  name: publish iosX64 snapshots
+            run: ./gradlew publishIosX64PublicationToDeployRepository
+
+         -  name: publish iosArm64 snapshots
+            run: ./gradlew publishIosArm64PublicationToDeployRepository
+
+         -  name: Bundle the build report
+            if: failure()
+            run: find . -type d -name 'reports' | zip -@ -r build-reports.zip
+
+         -  name: Upload the build report
+            if: failure()
+            uses: actions/upload-artifact@master
+            with:
+               name: error-report
+               path: build-reports.zip
+
+   publish_windows:
+      runs-on: windows-latest
+      needs: publish_macos
+
+      steps:
+         -  name: Checkout the repo
+            uses: actions/checkout@v2
+            with:
+               fetch-depth: 0
+               ref: ${{ github.event.inputs.branch }}
+
+         -  name: Setup JDK
+            uses: actions/setup-java@v1
+            with:
+               java-version: '8'
+
+         -  name: publish mingwX64 snapshots
+            run: ./gradlew publishMingwX64PublicationToDeployRepository
 
          -  name: Bundle the build report
             if: failure()
@@ -47,3 +129,7 @@ jobs:
 
 env:
    GRADLE_OPTS: -Dorg.gradle.configureondemand=true -Dorg.gradle.parallel=false -Dkotlin.incremental=false -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxPermSize=2048m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8"
+   OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+   OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+   ORG_GRADLE_PROJECT_signingKey: ${{ secrets.SIGNING_KEY }}
+   ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGNING_PASSWORD }}

@@ -12,7 +12,7 @@ on:
             default: 'master'
 
 jobs:
-   publish:
+   publish_linux:
       runs-on: ubuntu-latest
 
       steps:
@@ -22,14 +22,81 @@ jobs:
                fetch-depth: 0
                ref: ${{ github.event.inputs.branch }}
 
-         -  name: deploy to sonatype
-            run: ./gradlew publish
-            env:
-               RELEASE_VERSION: ${{ github.event.inputs.version }}
-               OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-               OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-               ORG_GRADLE_PROJECT_signingKey: ${{ secrets.SIGNING_KEY }}
-               ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGNING_PASSWORD }}
+         -  name: Setup JDK
+            uses: actions/setup-java@v2
+            with:
+               distribution: 'zulu'
+               java-version: '8'
+
+         -  name: publish multiplatform release
+            run: ./gradlew publishKotlinMultiplatformPublicationToDeployRepository
+
+         -  name: publish jvm release
+            run: ./gradlew publishJvmPublicationToDeployRepository
+
+         -  name: publish js release
+            run: ./gradlew publishJsPublicationToDeployRepository
+
+         -  name: publish linux x64 release
+            run: ./gradlew publishLinuxX64PublicationToDeployRepository
+
+   publish_macos:
+      runs-on: macos-11
+      needs: publish_linux
+
+      steps:
+         -  name: Checkout the repo
+            uses: actions/checkout@v2
+            with:
+               fetch-depth: 0
+               ref: ${{ github.event.inputs.branch }}
+
+         -  name: Setup JDK
+            uses: actions/setup-java@v1
+            with:
+               java-version: '8'
+
+         -  name: publish macosx64 release
+            run: ./gradlew publishMacosX64PublicationToDeployRepository
+
+         -  name: publish watchosX86 release
+            run: ./gradlew publishWatchosX86PublicationToDeployRepository
+
+         -  name: publish watchosArm32 release
+            run: ./gradlew publishWatchosArm32PublicationToDeployRepository
+
+         -  name: publish watchosArm64 release
+            run: ./gradlew publishWatchosArm64PublicationToDeployRepository
+
+         -  name: publish iosX64 release
+            run: ./gradlew publishIosX64PublicationToDeployRepository
+
+         -  name: publish iosArm64 release
+            run: ./gradlew publishIosArm64PublicationToDeployRepository
+
+   publish_windows:
+      runs-on: windows-latest
+      needs: publish_macos
+
+      steps:
+         -  name: Checkout the repo
+            uses: actions/checkout@v2
+            with:
+               fetch-depth: 0
+               ref: ${{ github.event.inputs.branch }}
+
+         -  name: Setup JDK
+            uses: actions/setup-java@v1
+            with:
+               java-version: '8'
+
+         -  name: publish mingwX64 release
+            run: ./gradlew publishMingwX64PublicationToDeployRepository
 
 env:
    GRADLE_OPTS: -Dorg.gradle.configureondemand=true -Dorg.gradle.parallel=false -Dkotlin.incremental=false -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxPermSize=2048m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8"
+   RELEASE_VERSION: ${{ github.event.inputs.version }}
+   OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+   OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+   ORG_GRADLE_PROJECT_signingKey: ${{ secrets.SIGNING_KEY }}
+   ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGNING_PASSWORD }}
