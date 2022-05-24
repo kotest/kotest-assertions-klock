@@ -1,22 +1,10 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
-buildscript {
-   repositories {
-      jcenter()
-      mavenCentral()
-      maven {
-         url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
-      }
-   }
-}
-
 plugins {
-   java
    `java-library`
    signing
    `maven-publish`
-   kotlin("multiplatform").version(Libs.kotlinVersion)
-   id("org.jetbrains.dokka") version "1.6.21"
+   kotlin("multiplatform") version "1.5.31"
 }
 
 repositories {
@@ -25,10 +13,9 @@ repositories {
    maven {
       url = uri("https://oss.sonatype.org/content/repositories/snapshots")
    }
-   jcenter()
 }
 
-group = Libs.org
+group = "io.kotest.extensions"
 version = Ci.version
 
 kotlin {
@@ -62,8 +49,8 @@ kotlin {
 
       val commonMain by getting {
          dependencies {
-            implementation(Libs.Kotest.assertionsShared)
-            implementation(Libs.Klock.klock)
+            implementation(libs.kotest.assertions.shared)
+            implementation(libs.klock)
          }
       }
 
@@ -74,7 +61,7 @@ kotlin {
       val jvmTest by getting {
          dependsOn(jvmMain)
          dependencies {
-            implementation(Libs.Kotest.junit5)
+            implementation(libs.kotest.runner.juni5)
          }
       }
 
