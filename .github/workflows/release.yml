@@ -25,7 +25,7 @@ jobs:
          -  name: Setup JDK
             uses: actions/setup-java@v3
             with:
-               distribution: 'zulu'
+               distribution: 'temurin'
                java-version: '8'
 
          -  name: publish multiplatform release
@@ -55,6 +55,7 @@ jobs:
             uses: actions/setup-java@v3
             with:
                java-version: '8'
+               distribution: 'temurin'
 
          -  name: publish macosx64 release
             run: ./gradlew publishMacosX64PublicationToDeployRepository
@@ -80,6 +81,7 @@ jobs:
             uses: actions/setup-java@v3
             with:
                java-version: '8'
+               distribution: 'temurin'
 
          -  name: publish mingwX64 release
             run: ./gradlew publishMingwX64PublicationToDeployRepository

@@ -22,7 +22,7 @@ jobs:
          -  name: Setup JDK
             uses: actions/setup-java@v3
             with:
-               distribution: 'zulu'
+               distribution: 'temurin'
                java-version: '8'
 
          -  name: Run tests
@@ -66,6 +66,7 @@ jobs:
             uses: actions/setup-java@v3
             with:
                java-version: '8'
+               distribution: 'temurin'
 
          -  name: publish macosx64 snapshots
             run: ./gradlew publishMacosX64PublicationToDeployRepository
@@ -102,6 +103,7 @@ jobs:
             uses: actions/setup-java@v3
             with:
                java-version: '8'
+               distribution: 'temurin'
 
          -  name: publish mingwX64 snapshots
             run: ./gradlew publishMingwX64PublicationToDeployRepository
