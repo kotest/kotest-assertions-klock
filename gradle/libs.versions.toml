@@ -1,5 +1,5 @@
 [versions]
-kotest = "5.3.2"
+kotest = "5.4.1"
 
 [libraries]
 kotest-assertions-shared = { module = "io.kotest:kotest-assertions-shared", version.ref = "kotest" }
