@@ -3,126 +3,69 @@ name: master
 on:
    push:
       paths-ignore:
+         - 'doc/**'
+         - 'documentation/**'
          - '*.md'
          - '*.yml'
+         - '.github/workflows/**'
       branches:
          - master
 
+permissions:
+   contents: read
+
 jobs:
-   publish_linux:
+   linux:
       runs-on: ubuntu-latest
-
+      strategy:
+         fail-fast: false
+         matrix:
+            target:
+               - jvmTest publishJvmPublicationToDeployRepository publishKotlinMultiplatformPublicationToDeployRepository
+               - jsTest publishJsPublicationToDeployRepository
+               - linuxX64Test publishLinuxX64PublicationToDeployRepository
       steps:
-         -  name: Checkout the repo
-            uses: actions/checkout@v3
+         -  uses: kotest/kotest-action@master
             with:
-               fetch-depth: 0
-               ref: ${{ github.event.inputs.branch }}
+               gradle-command: ${{ matrix.target }}
+               java-version: 11
 
-         -  name: Setup JDK
-            uses: actions/setup-java@v3
-            with:
-               distribution: 'temurin'
-               java-version: '8'
-
-         -  name: Run tests
-            run: ./gradlew check
-
-         -  name: publish multiplatform snapshots
-            run: ./gradlew publishKotlinMultiplatformPublicationToDeployRepository
-
-         -  name: publish jvm snapshots
-            run: ./gradlew publishJvmPublicationToDeployRepository
-
-         -  name: publish js snapshots
-            run: ./gradlew publishJsPublicationToDeployRepository
-
-         -  name: publish linux x64 snapshots
-            run: ./gradlew publishLinuxX64PublicationToDeployRepository
-
-         -  name: Bundle the build report
-            if: failure()
-            run: find . -type d -name 'reports' | zip -@ -r build-reports.zip
-
-         -  name: Upload the build report
-            if: failure()
-            uses: actions/upload-artifact@master
-            with:
-               name: error-report
-               path: build-reports.zip
-
-   publish_macos:
-      runs-on: macos-11
-      needs: publish_linux
-
+   mac:
+      needs: linux
+      runs-on: macos-latest
+      strategy:
+         fail-fast: false
+         matrix:
+            target:
+               - macosX64Test publishMacosX64PublicationToDeployRepository
+               - macosArm64Test publishMacosArm64PublicationToDeployRepository
+               - iosX64Test publishIosX64PublicationToDeployRepository
+               - iosSimulatorArm64Test publishIosSimulatorArm64PublicationToDeployRepository
+               - iosArm64TestKlibrary publishIosArm64PublicationToDeployRepository
+               - iosArm32TestKlibrary publishIosArm32PublicationToDeployRepository
+               - tvosX64Test publishTvosX64PublicationToDeployRepository
+               - tvosArm64TestKlibrary publishTvosArm64PublicationToDeployRepository
+               - watchosArm32TestKlibrary publishWatchosArm32PublicationToDeployRepository
+               - watchosArm64TestKlibrary publishWatchosArm64PublicationToDeployRepository
+               - watchosX86Test publishWatchosX86PublicationToDeployRepository
+               - watchosX64Test publishWatchosX64PublicationToDeployRepository
+               - watchosSimulatorArm64Test publishWatchosSimulatorArm64PublicationToDeployRepository
+               - tvosSimulatorArm64Test publishTvosSimulatorArm64PublicationToDeployRepository
       steps:
-         -  name: Checkout the repo
-            uses: actions/checkout@v3
+         -  uses: kotest/kotest-action@master
             with:
-               fetch-depth: 0
-               ref: ${{ github.event.inputs.branch }}
+               gradle-command: ${{ matrix.target }}
+               java-version: 11
 
-         -  name: Setup JDK
-            uses: actions/setup-java@v3
-            with:
-               java-version: '8'
-               distribution: 'temurin'
-
-         -  name: publish macosx64 snapshots
-            run: ./gradlew publishMacosX64PublicationToDeployRepository
-
-         -  name: publish iosX64 snapshots
-            run: ./gradlew publishIosX64PublicationToDeployRepository
-
-         -  name: publish iosArm64 snapshots
-            run: ./gradlew publishIosArm64PublicationToDeployRepository
-
-         -  name: Bundle the build report
-            if: failure()
-            run: find . -type d -name 'reports' | zip -@ -r build-reports.zip
-
-         -  name: Upload the build report
-            if: failure()
-            uses: actions/upload-artifact@master
-            with:
-               name: error-report
-               path: build-reports.zip
-
-   publish_windows:
+   windows:
+      needs: linux
       runs-on: windows-latest
-      needs: publish_macos
-
       steps:
-         -  name: Checkout the repo
-            uses: actions/checkout@v3
+         -  uses: kotest/kotest-action@master
             with:
-               fetch-depth: 0
-               ref: ${{ github.event.inputs.branch }}
-
-         -  name: Setup JDK
-            uses: actions/setup-java@v3
-            with:
-               java-version: '8'
-               distribution: 'temurin'
-
-         -  name: publish mingwX64 snapshots
-            run: ./gradlew publishMingwX64PublicationToDeployRepository
-
-         -  name: Bundle the build report
-            if: failure()
-            run: find . -type d -name 'reports' | zip -@ -r build-reports.zip
-
-         -  name: Upload the build report
-            if: failure()
-            uses: actions/upload-artifact@master
-            with:
-               name: error-report
-               path: build-reports.zip
-
+               gradle-command: "mingwX64Test publishMingwX64PublicationToDeployRepository"
+               java-version: 11
 
 env:
-   GRADLE_OPTS: -Dorg.gradle.configureondemand=true -Dorg.gradle.parallel=false -Dkotlin.incremental=false -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxPermSize=2048m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8"
    OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
    OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-   ORG_GRADLE_PROJECT_signingKey: ${{ secrets.SIGNING_KEY }}
-   ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGNING_PASSWORD }}

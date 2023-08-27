@@ -11,8 +11,17 @@ on:
             required: true
             default: 'master'
 
+
+env:
+   GRADLE_OPTS: -Dorg.gradle.configureondemand=true -Dorg.gradle.parallel=false -Dkotlin.incremental=false -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxPermSize=2048m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8"
+   RELEASE_VERSION: ${{ github.event.inputs.version }}
+   OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+   OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+   ORG_GRADLE_PROJECT_signingKey: ${{ secrets.SIGNING_KEY }}
+   ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGNING_PASSWORD }}
+
 jobs:
-   publish_linux:
+   linux:
       runs-on: ubuntu-latest
 
       steps:
@@ -25,25 +34,33 @@ jobs:
          -  name: Setup JDK
             uses: actions/setup-java@v3
             with:
+               java-version: '11'
                distribution: 'temurin'
-               java-version: '8'
 
-         -  name: publish multiplatform release
-            run: ./gradlew publishKotlinMultiplatformPublicationToDeployRepository
+         -  name: deploy to sonatype
+            run: ./gradlew publish
 
-         -  name: publish jvm release
-            run: ./gradlew publishJvmPublicationToDeployRepository
-
-         -  name: publish js release
-            run: ./gradlew publishJsPublicationToDeployRepository
-
-         -  name: publish linux x64 release
-            run: ./gradlew publishLinuxX64PublicationToDeployRepository
-
-   publish_macos:
-      runs-on: macos-11
-      needs: publish_linux
-
+   macos:
+      runs-on: macos-latest
+      strategy:
+         fail-fast: true
+         max-parallel: 1
+         matrix:
+            target:
+               - "publishMacosX64PublicationToDeployRepository"
+               - "publishMacosArm64PublicationToDeployRepository"
+               - "publishIosArm32PublicationToDeployRepository"
+               - "publishIosArm64PublicationToDeployRepository"
+               - "publishIosX64PublicationToDeployRepository"
+               - "publishTvosArm64PublicationToDeployRepository"
+               - "publishTvosX64PublicationToDeployRepository"
+               - "publishTvosSimulatorArm64PublicationToDeployRepository"
+               - "publishWatchosArm32PublicationToDeployRepository"
+               - "publishIosSimulatorArm64PublicationToDeployRepository"
+               - "publishWatchosArm64PublicationToDeployRepository"
+               - "publishWatchosX64PublicationToDeployRepository"
+               - "publishWatchosX86PublicationToDeployRepository"
+               - "publishWatchosSimulatorArm64PublicationToDeployRepository"
       steps:
          -  name: Checkout the repo
             uses: actions/checkout@v3
@@ -54,21 +71,14 @@ jobs:
          -  name: Setup JDK
             uses: actions/setup-java@v3
             with:
-               java-version: '8'
+               java-version: '11'
                distribution: 'temurin'
 
-         -  name: publish macosx64 release
-            run: ./gradlew publishMacosX64PublicationToDeployRepository
+         -  name: deploy to sonatype
+            run: ./gradlew ${{ matrix.target }}
 
-         -  name: publish iosX64 release
-            run: ./gradlew publishIosX64PublicationToDeployRepository
-
-         -  name: publish iosArm64 release
-            run: ./gradlew publishIosArm64PublicationToDeployRepository
-
-   publish_windows:
+   windows:
       runs-on: windows-latest
-      needs: publish_macos
 
       steps:
          -  name: Checkout the repo
@@ -80,16 +90,8 @@ jobs:
          -  name: Setup JDK
             uses: actions/setup-java@v3
             with:
-               java-version: '8'
+               java-version: '11'
                distribution: 'temurin'
 
-         -  name: publish mingwX64 release
+         -  name: deploy to sonatype
             run: ./gradlew publishMingwX64PublicationToDeployRepository
-
-env:
-   GRADLE_OPTS: -Dorg.gradle.configureondemand=true -Dorg.gradle.parallel=false -Dkotlin.incremental=false -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxPermSize=2048m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8"
-   RELEASE_VERSION: ${{ github.event.inputs.version }}
-   OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-   OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-   ORG_GRADLE_PROJECT_signingKey: ${{ secrets.SIGNING_KEY }}
-   ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGNING_PASSWORD }}

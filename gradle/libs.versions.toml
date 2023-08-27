@@ -6,4 +6,4 @@ kotest-assertions-shared = { module = "io.kotest:kotest-assertions-shared", vers
 kotest-framework-api = { module = "io.kotest:kotest-framework-api", version.ref = "kotest" }
 kotest-runner-juni5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
 
-klock = { module = "com.soywiz.korlibs.klock:klock", version = "2.7.0" }
+klock = { module = "com.soywiz.korlibs.klock:klock", version = "4.0.10" }
